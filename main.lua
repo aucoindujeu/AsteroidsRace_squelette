@@ -1,6 +1,8 @@
--- ***************
--- Game variables
--- ***************
+require "classic" -- import bibliothèque rxi/classic pour POO sous license MIT (fichier license joint)
+
+-- **********************************
+-- Variables utilisées dans le jeu
+-- *********************************
 
 -- Constantes
 LARGEUR_ECRAN = 800
