@@ -85,7 +85,7 @@ end
 function love.load()
 
   love.window.setMode(LARGEUR_ECRAN, HAUTEUR_ECRAN)
-  love.window.setTitle('Meteor Race - Code Club CimeLab - Au Coin du jeu')
+  love.window.setTitle('Asteroids Race - Code Club CimeLab - Au Coin du jeu')
   love.graphics.setFont(police)
 
 end
