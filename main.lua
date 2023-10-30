@@ -198,7 +198,7 @@ function love.draw()
   elseif etatJeu == 'game over' then
     
     love.graphics.printf("Score :"..tostring(joueur.score).." Tentatives :"..tostring(joueur.tentatives), 0, HAUTEUR_ECRAN/2, LARGEUR_ECRAN, 'center')
-    love.graphics.printf("Espace pour revenir au menu", 0, HAUTEUR_ECRAN/2 + 30, LARGEUR_ECRAN, 'center')
+    love.graphics.printf("Entrée pour revenir au menu", 0, HAUTEUR_ECRAN/2 + 30, LARGEUR_ECRAN, 'center')
   end
 end
 
@@ -209,7 +209,7 @@ function love.keypressed(key)
     love.event.quit()
   end
   
-  if key == 'space' and etatJeu == 'game over' then
+  if key == 'return' and etatJeu == 'game over' then
     etatJeu = 'demarrage'
   end
 
