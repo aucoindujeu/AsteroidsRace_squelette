@@ -6,11 +6,12 @@
 LARGEUR_ECRAN = 800
 HAUTEUR_ECRAN = 600
 HAUTEUR_INFO = 50
-NOMBRE_METEORES = 20
+NOMBRE_ASTEROIDES = 20
 TEMPS_DE_JEU = 60
 VITESSE_JOUEUR = 200
-VITESSE_METEORES = 250
-VARIO_METEORES =  150
+VITESSE_ASTEROIDES = 250
+VARIO_ASTEROIDES =  150
+PAUSE_RESSUSCITE = 10
 
 -- Variables du jeu
 chrono = 0 
@@ -21,9 +22,10 @@ joueur = {}
 joueur.score = 0
 joueur.tentatives = 0
 joueur.vitesse = VITESSE_JOUEUR
-
-meteores = {}
-meteores.liste = {}
+joueur.touche = false
+joueur.pause = PAUSE_RESSUSCITE 
+asteroides = {}
+asteroides.liste = {}
 
 -- ***************
 -- Son et images (sprites)
@@ -39,9 +41,9 @@ joueur.sonMoteur:setLooping(true)
 joueur.sonExplosion = love.audio.newSource('explosion.wav', 'static')
 
 -- Sprite étoiles
-meteores.image = love.graphics.newImage('meteore.png')
-meteores.largeur = meteores.image:getWidth()
-meteores.hauteur = meteores.image:getHeight()
+asteroides.image = love.graphics.newImage('asteroide.png')
+asteroides.largeur = asteroides.image:getWidth()
+asteroides.hauteur = asteroides.image:getHeight()
 
 -- Police de caractère
 police = love.graphics.newFont('police.ttf', 20)
@@ -67,15 +69,15 @@ function initJeu()
   joueur.score = 0
 
   -- Création des étoiles
-  meteores.liste = {} -- on vide la liste de sprites meteores
-  for n=1, NOMBRE_METEORES do
-    local meteore = {}
-    meteore.x = love.math.random(1, LARGEUR_ECRAN)
-    meteore.y = love.math.random(1, HAUTEUR_ECRAN - 2*joueur.hauteur - HAUTEUR_INFO)
-    meteore.direction = direction[love.math.random(1,2)]
-    meteore.vitesse = VITESSE_METEORES - love.math.random(VARIO_METEORES)
+  asteroides.liste = {} -- on vide la liste de sprites asteroides
+  for n=1, NOMBRE_ASTEROIDES do
+    local asteroide = {}
+    asteroide.x = love.math.random(1, LARGEUR_ECRAN)
+    asteroide.y = love.math.random(1, HAUTEUR_ECRAN - 2*joueur.hauteur - HAUTEUR_INFO)
+    asteroide.direction = direction[love.math.random(1,2)]
+    asteroide.vitesse = VITESSE_ASTEROIDES - love.math.random(VARIO_ASTEROIDES)
 
-    table.insert(meteores.liste, meteore)
+    table.insert(asteroides.liste, asteroide)
 
   end
 
@@ -117,17 +119,18 @@ function love.update(dt)
       joueur.score = joueur.score + 1
       joueur.y = HAUTEUR_ECRAN - joueur.hauteur - HAUTEUR_INFO 
     end
+    if joueur.touche == false then 
+      if love.keyboard.isDown('up') then
+        joueur.y = joueur.y - dt*joueur.vitesse
+        joueur.sonMoteur:setPitch(2)
+        
+      elseif love.keyboard.isDown('down') and (joueur.y < HAUTEUR_ECRAN - joueur.hauteur - HAUTEUR_INFO) then
+        joueur.y = joueur.y + dt*joueur.vitesse
+        joueur.sonMoteur:setPitch(0.5)
 
-    if love.keyboard.isDown('up') then
-      joueur.y = joueur.y - dt*joueur.vitesse
-      joueur.sonMoteur:setPitch(2)
-      
-    elseif love.keyboard.isDown('down') and (joueur.y < HAUTEUR_ECRAN - joueur.hauteur - HAUTEUR_INFO) then
-      joueur.y = joueur.y + dt*joueur.vitesse
-      joueur.sonMoteur:setPitch(0.5)
-
-    else
-      joueur.sonMoteur:setPitch(1)
+      else
+        joueur.sonMoteur:setPitch(1)
+      end
     end
 
     -- on replace le joueur si d’avenure il est descendu trop bas
@@ -136,23 +139,32 @@ function love.update(dt)
     end
 
     --**********************
-    -- UPDATE meteoreS
+    -- UPDATE asteroideS
     --**********************
 
     -- on parcourt la liste des étoiles
-    for index, meteore in ipairs(meteores.liste) do
+    for index, asteroide in ipairs(asteroides.liste) do
      
       -- update position de chaque étoile
-      meteore.x = meteore.x + dt * meteore.direction * meteore.vitesse
-      if (meteore.x > LARGEUR_ECRAN + meteores.largeur) or (meteore.x < 0 - meteores.largeur) then
-        meteore.x = LARGEUR_ECRAN/2 - meteore.direction * LARGEUR_ECRAN/2
+      asteroide.x = asteroide.x + dt * asteroide.direction * asteroide.vitesse
+      if (asteroide.x > LARGEUR_ECRAN + asteroides.largeur) or (asteroide.x < 0 - asteroides.largeur) then
+        asteroide.x = LARGEUR_ECRAN/2 - asteroide.direction * LARGEUR_ECRAN/2
       end
    
       -- teste collision de chaque étoile avec la fusée
-      if testeCollision(meteore.x, meteore.y, meteores.largeur, meteores.hauteur, joueur.x, joueur.y, joueur.largeur, joueur.hauteur) then
+      if testeCollision(asteroide.x, asteroide.y, asteroides.largeur, asteroides.hauteur, joueur.x, joueur.y, joueur.largeur, joueur.hauteur) and joueur.touche == false then
         joueur.tentatives = joueur.tentatives + 1
-        -- PENSER A GERER EXPLOSION
-        joueur.y = HAUTEUR_ECRAN - joueur.hauteur - HAUTEUR_INFO
+        -- On gère l’explosion (+ sauvegarder dernière position joueur)
+        joueur.touche = true
+        joueur.sonExplosion:play()
+      end
+      if joueur.touche == true then
+        joueur.pause = joueur.pause - dt
+        if joueur.pause <= 0 then
+          joueur.y = HAUTEUR_ECRAN - joueur.hauteur - HAUTEUR_INFO
+          joueur.touche = false
+          joueur.pause = PAUSE_RESSUSCITE
+        end
       end
 
     end
@@ -186,13 +198,16 @@ function love.draw()
     -- *****************
     -- AFFICHAGE JOUEUR
     -- *****************
-    love.graphics.draw(joueur.image, joueur.x, joueur.y)
-
+    if joueur.touche == false then
+      love.graphics.draw(joueur.image, joueur.x, joueur.y)
+    else
+      love.graphics.draw(joueur.imgExplosion, joueur.x, joueur.y)
+    end
     -- *****************
-    -- AFFICHAGE METEORES 
+    -- AFFICHAGE asteroideS 
     -- *****************
-    for index, meteore in ipairs(meteores.liste) do
-      love.graphics.draw(meteores.image, meteore.x, meteore.y)
+    for index, asteroide in ipairs(asteroides.liste) do
+      love.graphics.draw(asteroides.image, asteroide.x, asteroide.y)
     end
 
   elseif etatJeu == 'game over' then
