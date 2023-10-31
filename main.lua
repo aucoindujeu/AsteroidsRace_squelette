@@ -1,5 +1,4 @@
 -- TO DO
--- * corriger bug collision
 -- * faire le menu de sélection multijoueur
 -- * gérer le positionnement des vaisseaux au départ en mode multijoueur (décentrés)
 -- * gérer l’affichage des scores/tentatives par joueur durant le jeu
@@ -22,7 +21,7 @@ TEMPS_DE_JEU = 60
 VITESSE_JOUEUR = 200
 VITESSE_ASTEROIDES = 250
 VARIO_ASTEROIDES =  150
-PAUSE_RESSUSCITE = 10
+PAUSE_RESSUSCITE = 1 
 
 -- Variables du jeu
 chrono = 0 
@@ -85,7 +84,7 @@ function Joueureuse:update(dt)
   else 
     self.pause = self.pause - dt -- petite pause quand le vaisseau explose
     if self.pause <= 0 then
-      self.y = HAUTEUR_ECRAN - joueur.hauteur - HAUTEUR_INFO -- pause finie : on replace le vaisseau en bas
+      self.y = HAUTEUR_ECRAN - self.hauteur - HAUTEUR_INFO -- pause finie : on replace le vaisseau en bas
       self.touche = false -- on réinitialise
       self.pause = PAUSE_RESSUSCITE
     end
@@ -228,7 +227,7 @@ function love.update(dt)
       -- teste collision de chaque étoile avec la fusée
       for k, j in ipairs(lstJoueureuses) do
         if testeCollision(asteroide.x, asteroide.y, asteroides.largeur, asteroides.hauteur, j.x, j.y, j.largeur, j.hauteur) and j.touche == false then
-        --j.collision()
+        j:collision()
         end
       end  
     
