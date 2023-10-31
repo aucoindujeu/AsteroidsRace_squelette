@@ -39,7 +39,7 @@ asteroides.liste = {}
 -- Sprite joueur (objet)
 Joueureuse = Objet:extend()
 
-function Joueureuse:new(pImgJoueur, pKeyUp, pKeyDown)
+function Joueureuse:new(pImgJoueur, pXini, pKeyUp, pKeyDown)
 
   self.image = love.graphics.newImage(pImgJoueur)
   self.imgExplosion = love.graphics.newImage('explosion.png')
@@ -49,7 +49,7 @@ function Joueureuse:new(pImgJoueur, pKeyUp, pKeyDown)
   self.sonMoteur:setLooping(true)
   self.sonExplosion = love.audio.newSource('explosion.wav', 'static')
   
-  self.x = (LARGEUR_ECRAN - self.largeur)/2
+  self.x = pXini 
   self.y = HAUTEUR_ECRAN - self.hauteur - HAUTEUR_INFO
 
   self.score = 0
@@ -151,10 +151,12 @@ function initJeu()
   
   lstJoueureuses = {}
 
-  table.insert(lstJoueureuses, Joueureuse('joueureuse1.png', 'up', 'down'))
 
   if multijoueureuses == true then
-    table.insert(Joueureuses('joueureuse2.png', 'z', 's'))
+    table.insert(lstJoueureuses, Joueureuse('joueureuse1.png', LARGEUR_ECRAN/4, 'up', 'down'))
+    table.insert(lstJoueureuses, Joueureuse('joueureuse2.png', 3 * LARGEUR_ECRAN/4, 'z', 's'))
+  else
+    table.insert(lstJoueureuses, Joueureuse('joueureuse1.png', LARGEUR_ECRAN/2, 'up', 'down'))
   end
 
   for k, j in ipairs(lstJoueureuses) do
@@ -190,7 +192,7 @@ function love.update(dt)
   if etatJeu == 'demarrage' then
 
     -- selection mode 1 ou 2 joueur
-    --
+    -- 
     --
   elseif etatJeu == 'en jeu' then
     
@@ -249,8 +251,22 @@ end
 function love.draw()
 
   if etatJeu == 'demarrage' then
-    love.graphics.printf("Pour lancer le jeu appuyer sur espace", 0, HAUTEUR_ECRAN/2, LARGEUR_ECRAN, 'center')
 
+    love.graphics.printf("ASTEROIDS RACE", 0, 100, LARGEUR_ECRAN, 'center')
+    
+    love.graphics.printf("Choisissez le nombre de joueurs avec les flèches gauche ou droite", 20, HAUTEUR_ECRAN/2 - 80, LARGEUR_ECRAN - 20, 'center')
+
+    if multijoueureuses == false then
+      nJoueureuses = "1 joueur-euse"
+    else
+      nJoueureuses = "2 joueur-euse-s" 
+    end
+    love.graphics.printf(nJoueureuses, 0, HAUTEUR_ECRAN/2, LARGEUR_ECRAN, 'center') 
+
+    love.graphics.printf("Pour lancer le jeu appuyer sur ‘espace‘", 20, HAUTEUR_ECRAN/2 + 50, LARGEUR_ECRAN - 20, 'center')
+    love.graphics.printf("Jouez avec les touches ‘haut‘, ‘bas‘, ‘z’ et ’s’", 20, HAUTEUR_ECRAN/2 + 120, LARGEUR_ECRAN - 20, 'center')
+    love.graphics.printf("À tout moment, quittez avec ’echap‘", 20, HAUTEUR_ECRAN/2 + 200, LARGEUR_ECRAN - 20, 'center')
+    
   elseif etatJeu == 'en jeu' then
     
     -- *****************
@@ -266,8 +282,8 @@ function love.draw()
    
     for k, j in ipairs(lstJoueureuses) do
       j:draw()
-      love.graphics.print("Score:"..tostring(j.score), 10, HAUTEUR_ECRAN - 45)
-      love.graphics.print("Tentatives:"..tostring(j.tentatives), 10, HAUTEUR_ECRAN -25)
+      love.graphics.print("Score:"..tostring(j.score), 10 * k, HAUTEUR_ECRAN - 45)
+      love.graphics.print("Tentatives:"..tostring(j.tentatives), 10 * k, HAUTEUR_ECRAN -25)
 
     end
 
@@ -285,7 +301,7 @@ function love.draw()
       love.graphics.printf("Score :"..tostring(j.score).." Tentatives :"..tostring(j.tentatives), 0, HAUTEUR_ECRAN/2, LARGEUR_ECRAN, 'center')
     end
     
-    love.graphics.printf("Entrée pour revenir au menu", 0, HAUTEUR_ECRAN/2 + 30, LARGEUR_ECRAN, 'center')
+    love.graphics.printf("‘Entrée‘ pour revenir au menu", 0, HAUTEUR_ECRAN/2 + 30, LARGEUR_ECRAN, 'center')
 
   end
 end
@@ -301,8 +317,14 @@ function love.keypressed(key)
     etatJeu = 'demarrage'
   end
 
-  if key == 'space' and etatJeu == 'demarrage' then
-    initJeu()
+  if etatJeu == 'demarrage' then
+    
+    if (key == 'left') or (key == 'right') then
+      multijoueureuses = not multijoueureuses
+    end
+    if key == 'space' then
+      initJeu()
+    end
   end
 
 end
