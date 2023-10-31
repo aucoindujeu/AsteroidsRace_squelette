@@ -1,12 +1,7 @@
--- TO DO
--- * faire le menu de sélection multijoueur
--- * gérer le positionnement des vaisseaux au départ en mode multijoueur (décentrés)
--- * gérer l’affichage des scores/tentatives par joueur durant le jeu
--- * gérer l’affichage des socres/tentatives par joueur sur écran game over
-
-
-
-Objet = require "classic" -- import bibliothèque rxi/classic pour POO sous license MIT (fichier license joint)
+-- *************************
+-- Import modules externes
+-- *************************
+Objet = require "classic" -- import bibliothèque rxi/classic pour POO en Lua (sous license MIT - fichier license joint)
 
 -- **********************************
 -- Variables utilisées dans le jeu
@@ -28,6 +23,7 @@ chrono = 0
 direction = {-1, 1}
 etatJeu = 'demarrage'
 multijoueureuses = false
+positionInfo = {'left', 'right'}
 
 asteroides = {}
 asteroides.liste = {}
@@ -53,7 +49,7 @@ function Joueureuse:new(pImgJoueur, pXini, pKeyUp, pKeyDown)
   self.y = HAUTEUR_ECRAN - self.hauteur - HAUTEUR_INFO
 
   self.score = 0
-  self.tentatives = 0
+  self.crashes = 0
   self.vitesse = VITESSE_JOUEUR
 
   self.up = pKeyUp
@@ -90,7 +86,7 @@ function Joueureuse:update(dt)
     end
   end
 
-    -- on replace le vaisseau si d’avenrure il est descendu trop bas
+    -- on replace le vaisseau si d’aventure il est descendu trop bas
     if self.y > HAUTEUR_ECRAN - self.hauteur - HAUTEUR_INFO then
       self.y = HAUTEUR_ECRAN - self.hauteur - HAUTEUR_INFO
     end
@@ -117,7 +113,7 @@ end
 
 function Joueureuse:collision()
   
-  self.tentatives = self.tentatives + 1
+  self.crashes = self.crashes + 1
   -- On gère l’explosion (+ sauvegarder dernière position joueur)
   self.touche = true
   self.sonExplosion:play()
@@ -143,6 +139,9 @@ function testeCollision(pX1, pY1, pL1, pH1, pX2, pY2, pL2, pH2)
 
 end
 
+-- ****************************
+-- INITIALISATION DE LA PARTIE 
+-- ****************************
 
 function initJeu()
   
@@ -151,10 +150,9 @@ function initJeu()
   
   lstJoueureuses = {}
 
-
   if multijoueureuses == true then
-    table.insert(lstJoueureuses, Joueureuse('joueureuse1.png', LARGEUR_ECRAN/4, 'up', 'down'))
-    table.insert(lstJoueureuses, Joueureuse('joueureuse2.png', 3 * LARGEUR_ECRAN/4, 'z', 's'))
+    table.insert(lstJoueureuses, Joueureuse('joueureuse1.png', LARGEUR_ECRAN/3, 'up', 'down'))
+    table.insert(lstJoueureuses, Joueureuse('joueureuse2.png', 2 * LARGEUR_ECRAN/3, 'z', 's'))
   else
     table.insert(lstJoueureuses, Joueureuse('joueureuse1.png', LARGEUR_ECRAN/2, 'up', 'down'))
   end
@@ -186,6 +184,10 @@ function love.load()
   love.graphics.setFont(police)
 
 end
+
+-- ******************
+-- EVOLUTION EN JEU (update)
+-- ******************
 
 function love.update(dt)
   
@@ -248,13 +250,16 @@ function love.update(dt)
 
 end 
 
+-- ***************
+-- AFFICHAGE
+-- ***************
 function love.draw()
 
   if etatJeu == 'demarrage' then
 
     love.graphics.printf("ASTEROIDS RACE", 0, 100, LARGEUR_ECRAN, 'center')
     
-    love.graphics.printf("Choisissez le nombre de joueurs avec les flèches gauche ou droite", 20, HAUTEUR_ECRAN/2 - 80, LARGEUR_ECRAN - 20, 'center')
+    love.graphics.printf("Choisissez le nombre de joueur-euse-s avec les flèches gauche ou droite", 20, HAUTEUR_ECRAN/2 - 80, LARGEUR_ECRAN - 20, 'center')
 
     if multijoueureuses == false then
       nJoueureuses = "1 joueur-euse"
@@ -282,8 +287,8 @@ function love.draw()
    
     for k, j in ipairs(lstJoueureuses) do
       j:draw()
-      love.graphics.print("Score:"..tostring(j.score), 10 * k, HAUTEUR_ECRAN - 45)
-      love.graphics.print("Tentatives:"..tostring(j.tentatives), 10 * k, HAUTEUR_ECRAN -25)
+      love.graphics.printf("Score J"..tostring(k)..":"..tostring(j.score), 10, HAUTEUR_ECRAN - 45, LARGEUR_ECRAN - 20, positionInfo[k])
+      love.graphics.printf("Crashes J"..tostring(k)..":"..tostring(j.crashes), 10, HAUTEUR_ECRAN -25, LARGEUR_ECRAN - 20, positionInfo[k])
 
     end
 
@@ -298,7 +303,7 @@ function love.draw()
   elseif etatJeu == 'game over' then
     
     for k, j in ipairs(lstJoueureuses) do
-      love.graphics.printf("Score :"..tostring(j.score).." Tentatives :"..tostring(j.tentatives), 0, HAUTEUR_ECRAN/2, LARGEUR_ECRAN, 'center')
+      love.graphics.printf("Score J"..tostring(k)..":"..tostring(j.score).." - Crashes J"..tostring(k)..":"..tostring(j.crashes), 0, HAUTEUR_ECRAN/2 - 100 + k*30, LARGEUR_ECRAN, 'center')
     end
     
     love.graphics.printf("‘Entrée‘ pour revenir au menu", 0, HAUTEUR_ECRAN/2 + 30, LARGEUR_ECRAN, 'center')
@@ -306,7 +311,9 @@ function love.draw()
   end
 end
 
-
+-- ******************
+-- TOUCHES HORS-JEU 
+-- ******************
 function love.keypressed(key)
 
   if key == 'escape' then
