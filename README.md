@@ -1,8 +1,8 @@
 # Asteroids Race [base]
 
-Base de jeu inspirée de Space Race (1973), second jeu créé par Atari après Pong. Créé pour servir de support lors des ateliers « Code Club » du [Cimelab](https://www.aucoindujeu05.fr/fablab/) à Briançon.
+Base de jeu inspirée de Space Race (1973), second jeu créé par Atari après Pong. Créé pour servir de support lors des ateliers « Code Club » du [Cimelab](https://www.aucoindujeu05.fr/fablab/) à Briançon. C’est exprès si le son et les images sont minimalistes : l’exercice est justement de les améliorer.
 
-Chaque joueur doit amener son vaisseau (qui peut avancer ou reculer gràce aux flèches directionnelles haut et bas) de l’autre côté de l’écran, en évitant les astéroïdes, le plus de fois possible avant que le chronomètre tombe à 0. À améliorer (graphismes, sons, etc.) ou à simplement  modifier sans vergogne ! 
+Chaque joueur doit amener son vaisseau (qui peut avancer ou reculer gràce aux flèches directionnelles haut et bas) de l’autre côté de l’écran, en évitant les astéroïdes, le plus de fois possible avant que le chronomètre tombe à 0. À améliorer (graphismes, sons, etc.) ou à simplement  modifier sans vergogne ! Vous pouvez tester le jeu en ligne [ici](https://aucoindujeu.github.io/base-asteroidsrace/).
 
 - vous pouvez modifier les sprites à partir des fichiers situés dans le dossier [src/images/](https://github.com/aucoindujeu/base-asteroidsrace/tree/main/src/images)
 
