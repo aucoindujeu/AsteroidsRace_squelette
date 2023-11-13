@@ -3,6 +3,19 @@
 -- *************************
 Objet = require "lib/classic" -- import bibliothèque rxi/classic pour POO en Lua (sous license MIT - fichier license joint)
 
+-- Si on utilise love.js pour mettre le jeu en ligne,
+-- il faut désactiver l’utilisation des joysticks
+-- car love.js ne les supporte pas
+--
+-- Are we in love.js? Joysticks are not supported there.
+-- https://github.com/Davidobot/love.js/issues/74
+if love.system.getOS() == "web" then
+  -- Joysticks don't work in love.js
+  -- https://github.com/Davidobot/love.js/issues/41
+  t.modules.joystick = false
+end
+
+
 -- **********************************
 -- Variables utilisées dans le jeu
 -- *********************************
